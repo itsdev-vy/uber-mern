@@ -2,7 +2,7 @@
 
 ## Endpoint
 
-`POST /user/register`
+`POST /users/register`
 
 ## Description
 
@@ -92,7 +92,7 @@ Validation rules used by the route (see `src/routes/user.routes.js`):
 
 ## Endpoint
 
-`GET /user/profile`
+`GET /users/profile`
 
 ## Description
 
@@ -130,7 +130,7 @@ Example success response:
 
 ## Endpoint
 
-`GET /user/logout`
+`GET /users/logout`
 
 ## Description
 
@@ -168,7 +168,7 @@ Notes:
 
 ## Endpoint
 
-`POST /captain/register`
+`POST /captains/register`
 
 ## Description
 
