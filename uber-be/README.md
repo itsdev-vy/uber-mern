@@ -161,3 +161,86 @@ Notes:
 
 - The logout handler clears the `token` cookie and also persists the token to a `blacklistToken` model to prevent reuse.
 - If your client stores tokens elsewhere (localStorage), make sure to remove them on logout as well.
+
+---
+
+## Captain Registration Endpoint Documentation
+
+## Endpoint
+
+`POST /captain/register`
+
+## Description
+
+Registers a new captain in the system. This endpoint accepts captain details including personal information, vehicle details, and password. It validates the input, checks if the captain already exists, hashes the password, and creates a new captain account.
+
+## Request Body
+
+Send a JSON object with the following fields:
+
+| Field               | Type   | Required | Description                                     |
+| ------------------- | ------ | -------- | ----------------------------------------------- |
+| fullname.firstname  | String | Yes      | Captain's first name (min 3 characters)         |
+| fullname.lastname   | String | No       | Captain's last name (min 3 characters)          |
+| email               | String | Yes      | Captain's email address (must be valid format)  |
+| password            | String | Yes      | Captain's password (min 6 characters)           |
+| vehicle.color       | String | Yes      | Vehicle color (min 3 characters)                |
+| vehicle.plate       | String | Yes      | Vehicle plate number (min 3 characters, unique) |
+| vehicle.capacity    | Number | Yes      | Vehicle capacity (min 1 passenger)              |
+| vehicle.vehicleType | String | Yes      | Vehicle type (enum: 'car', 'bike', 'auto')      |
+
+### Example
+
+```json
+{
+  "fullname": {
+    "firstname": "Jane",
+    "lastname": "Smith"
+  },
+  "email": "jane.smith@example.com",
+  "password": "securePassword123",
+  "vehicle": {
+    "color": "Black",
+    "plate": "AB1234CD",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+## Responses
+
+- 201 Created: Returns `{ message, token, captain }` on successful registration.
+- 400 Bad Request: Captain with the email already exists, or validation errors.
+- 500 Internal Server Error: Server error during registration.
+
+Example success response:
+
+```json
+{
+  "message": "Captain registered successfully",
+  "token": "<jwt-token>",
+  "captain": {
+    "_id": "...",
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "jane.smith@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234CD",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive"
+  }
+}
+```
+
+Validation rules used by the route (see `src/routes/captain.routes.js`):
+
+- `email` must be a valid email format.
+- `fullname.firstname` must be at least 3 characters long.
+- `vehicle.color` must be at least 3 characters long.
+- `vehicle.plate` must be at least 3 characters long and unique across all captains.
+- `vehicle.capacity` must be at least 1.
+- `vehicle.vehicleType` must be one of: 'car', 'bike', 'auto'.
+- `password` must be at least 6 characters long.

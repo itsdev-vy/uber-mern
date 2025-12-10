@@ -8,6 +8,7 @@ const connectDB = require('./db/db');
 const cors = require('cors');
 const http = require('http');
 const userRoutes = require('./routes/user.routes');
+const captainRoutes = require('./routes/captain.routes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', userRoutes);
+app.use('/captains', captainRoutes);
 
 
 const server = http.createServer(app);
