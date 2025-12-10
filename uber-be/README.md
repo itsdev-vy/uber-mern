@@ -244,3 +244,145 @@ Validation rules used by the route (see `src/routes/captain.routes.js`):
 - `vehicle.capacity` must be at least 1.
 - `vehicle.vehicleType` must be one of: 'car', 'bike', 'auto'.
 - `password` must be at least 6 characters long.
+
+---
+
+## Captain Login Endpoint Documentation
+
+## Endpoint
+
+`POST /captains/login`
+
+## Description
+
+Authenticates an existing captain using email and password. On success, the endpoint returns an authentication token and the authenticated captain object. The endpoint validates input and returns appropriate HTTP status codes for validation errors or authentication failures. The login handler also sets a cookie named `token` with the JWT.
+
+## Request Body
+
+Send a JSON object with the following fields:
+
+| Field    | Type   | Required | Description                             |
+| -------- | ------ | -------- | --------------------------------------- |
+| email    | String | Yes      | Captain's email address (must be valid) |
+| password | String | Yes      | Captain's password (min 6 characters)   |
+
+### Example
+
+```json
+{
+  "email": "jane.smith@example.com",
+  "password": "securePassword123"
+}
+```
+
+## Responses
+
+- 200 OK: Returns `{ message, token, captain }` on successful authentication.
+- 400 Bad Request: Invalid email or password (per current controller behavior).
+- 422 Unprocessable Entity: Validation errors (invalid email format or password too short).
+
+Example success response:
+
+```json
+{
+  "message": "Login successful",
+  "token": "<jwt-token>",
+  "captain": {
+    "_id": "...",
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "jane.smith@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234CD",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive"
+  }
+}
+```
+
+---
+
+## Captain Profile Endpoint Documentation
+
+## Endpoint
+
+`GET /captains/profile`
+
+## Description
+
+Returns the authenticated captain's profile. This is a protected route and requires a valid authentication token. The route uses the `authCaptain` middleware to verify the token and attach the captain object to `req.captain`.
+
+## Authentication
+
+Provide the JWT via either:
+
+- A cookie named `token` (the server sets this cookie on login), or
+- An Authorization header: `Authorization: Bearer <token>`
+
+## Request
+
+No request body. The endpoint reads the token from cookie or Authorization header and returns the current captain's profile.
+
+## Responses
+
+- 200 OK: Returns the authenticated captain object.
+- 401 Unauthorized: Missing or invalid authentication token.
+
+Example success response:
+
+```json
+{
+  "captain": {
+    "_id": "...",
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "jane.smith@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "AB1234CD",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive"
+  }
+}
+```
+
+---
+
+## Captain Logout Endpoint Documentation
+
+## Endpoint
+
+`GET /captains/logout`
+
+## Description
+
+Logs out the authenticated captain by clearing the `token` cookie and recording the token in a blacklist so it cannot be reused. This endpoint is protected and requires a valid authentication token.
+
+## Authentication
+
+Provide the JWT via the cookie named `token` or the `Authorization: Bearer <token>` header. The route uses the `authCaptain` middleware to ensure the request is authenticated.
+
+## Request
+
+No request body required. The server will read the token from the cookie or header, store the token in a blacklist collection, clear the cookie, and return a success message.
+
+## Responses
+
+- 200 OK: `{ "message": "Logout successful" }` on success.
+- 401 Unauthorized: Missing or invalid authentication token.
+
+Example success response:
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+Notes:
+
+- The logout handler persists the token to a `blacklistToken` model to prevent reuse and clears the `token` cookie.
+- If your client stores tokens elsewhere (e.g. `localStorage`), make sure to remove them on logout as well.
